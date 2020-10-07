@@ -8,16 +8,28 @@ import 'package:flutter_banner_swiper/banner_indicator.dart';
 typedef GetWidgetCallback = Widget Function(int index);
 
 class BannerSwiper extends StatefulWidget {
-  final int length  ;
+  final int length;
   final GetWidgetCallback getwidget;
   final int width;
   final int height;
   final Widget selectorWidget;
-  final  Widget normalWidget;
+  final Widget normalWidget;
   final bool autoLoop;
   final bool showIndicator;
   final bool spaceMode;
-  BannerSwiper({Key key, this.length, this.getwidget,@required this.width,@required this.height,this.selectorWidget,this.normalWidget,this.autoLoop=true,this.showIndicator=true,this.spaceMode=true});
+  final Function onPageChanged;
+  BannerSwiper(
+      {Key key,
+      this.length,
+      this.getwidget,
+      @required this.width,
+      @required this.height,
+      this.selectorWidget,
+      this.normalWidget,
+      this.autoLoop = true,
+      this.showIndicator = true,
+      this.spaceMode = true,
+      this.onPageChanged});
 
   @override
   State<StatefulWidget> createState() {
@@ -71,28 +83,26 @@ class _BannerSwiperState extends State<BannerSwiper> {
 
   SquareIndicator squareIndicator;
 
-  GlobalKey<MSquareIndicator> indicatorKey=GlobalKey<MSquareIndicator> ();
+  GlobalKey<MSquareIndicator> indicatorKey = GlobalKey<MSquareIndicator>();
 
-  double viewportFractionCustom=1;
-  double paddingCustom=0;
+  double viewportFractionCustom = 1;
+  double paddingCustom = 0;
   Widget getBanner2() {
-    if(widget.spaceMode){
-      viewportFractionCustom=0.925;
-      paddingCustom=0.0125;
+    if (widget.spaceMode) {
+      viewportFractionCustom = 0.925;
+      paddingCustom = 0.0125;
     }
     mywidth = MediaQuery.of(context).size.width;
 
     if (widget.length > 0 && _pageController == null) {
-
-
       _pageController = new PageController(
-          initialPage: widget.length * 100, viewportFraction: viewportFractionCustom);
+          initialPage: widget.length * 100,
+          viewportFraction: viewportFractionCustom);
       _currentIndex = widget.length * 100;
 
-      if(widget.autoLoop){
+      if (widget.autoLoop) {
         _setTimer();
       }
-
     }
     if (widget.length == 0) {
       return Container();
@@ -103,11 +113,14 @@ class _BannerSwiperState extends State<BannerSwiper> {
         Container cc = Container(
           key: _key,
           //左右两个padding
-          margin:
-          EdgeInsets.only(left: mywidth * paddingCustom, right: mywidth * paddingCustom),
+          margin: EdgeInsets.only(
+              left: mywidth * paddingCustom, right: mywidth * paddingCustom),
           width: mywidth,
 
-          height: mywidth * (viewportFractionCustom-paddingCustom*2) * widget.width / widget.height,
+          height: mywidth *
+              (viewportFractionCustom - paddingCustom * 2) *
+              widget.width /
+              widget.height,
           child: widget.getwidget(index),
         );
 
@@ -121,15 +134,16 @@ class _BannerSwiperState extends State<BannerSwiper> {
       onPageChanged: ((index) {
 //        setState(() {
         _currentIndex = index;
-        if(indicatorKey.currentState!=null){
-          indicatorKey.currentState.updateWidgets(widget.length,(_currentIndex) % widget.length);
-        }else{
-        }
+        widget?.onPageChanged((_currentIndex) % widget.length);
+        if (indicatorKey.currentState != null) {
+          indicatorKey.currentState
+              .updateWidgets(widget.length, (_currentIndex) % widget.length);
+        } else {}
 //        squareIndicator.createState().setState((){});
 //        });
       }),
     );
-    if(widget.showIndicator){
+    if (widget.showIndicator) {
       squareIndicator = SquareIndicator(
         normalWidget: widget.normalWidget,
         selectorWidget: widget.selectorWidget,
@@ -141,27 +155,26 @@ class _BannerSwiperState extends State<BannerSwiper> {
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width * widget.width / widget.height * (viewportFractionCustom-paddingCustom*2),
+      height: MediaQuery.of(context).size.width *
+          widget.width /
+          widget.height *
+          (viewportFractionCustom - paddingCustom * 2),
       child: Stack(
-        children: <Widget>[
-          pageView,
-          _getSquareIndicator()
-        ],
+        children: <Widget>[pageView, _getSquareIndicator()],
       ),
     );
   }
- Widget _getSquareIndicator(){
-    if(widget.showIndicator){
+
+  Widget _getSquareIndicator() {
+    if (widget.showIndicator) {
       return Positioned(
         bottom: mywidth * 0.02,
         left: 0,
         right: 0,
         child: squareIndicator,
       );
-    }else{
+    } else {
       return Container();
     }
-
   }
-
 }
